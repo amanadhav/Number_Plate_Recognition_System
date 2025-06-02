@@ -1,0 +1,30 @@
+const express = require('express');
+const multer = require('multer');
+const Tesseract = require('tesseract.js');
+const mongoose = require('mongoose');
+const app = express();
+const PORT = 3001;
+
+// This is the MongoDB setup
+mongoose.connect('mongodb://localhost:27017/plates', { useNewUrlParser: true });
+
+const Plate = mongoose.model('Plate', {
+  text: String,
+  date: { type: Date, default: Date.now }
+});
+
+// File upload middleware
+const upload = multer({ dest: 'uploads/' });
+
+app.post('/upload', upload.single('image'), async (req, res) => {
+  const { path } = req.file;
+  const result = await Tesseract.recognize(path, 'eng');
+  const plateText = result.data.text.trim();
+
+  const entry = new Plate({ text: plateText });
+  await entry.save();
+
+  res.json({ plateText });
+});
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
