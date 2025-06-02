@@ -1,0 +1,25 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+function UploadComponent() {
+  const [file, setFile] = useState(null);
+  const [result, setResult] = useState('');
+
+  const handleUpload = async () => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const res = await axios.post('http://localhost:3001/upload', formData);
+    setResult(res.data.plateText);
+  };
+
+  return (
+    <div>
+      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+      <button onClick={handleUpload}>Upload</button>
+      <p>Detected Plate: {result}</p>
+    </div>
+  );
+}
+
+export default UploadComponent;
